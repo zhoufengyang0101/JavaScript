@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=], initial-scale=1.0">
+    <title>apply</title>
+</head>
+
+<body>
+    <script>
+        // 和call方法类似，只有一个区别：
+        // call方法接受若干个参数的列表  apply接受一个包含多个参数的数组
+        // 使用apply来链接构造器
+        Function.prototype.construct = function (aArgs) {
+            var oNew = Object.create(this.prototype);
+            this.apply(oNew, aArgs);
+            return oNew;
+        };
+        // ...........................
+        // apply实现数组求最大值
+        // Math.max.apply(nill, arr)
+
+    </script>
+</body>
+
+</html>

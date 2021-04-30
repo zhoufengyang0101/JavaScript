@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        // 1. 创建一个空对象，作为将要返回的对象实例
+        // 2. 将这个空对象的原型，指向构造函数的`prototype`属性
+        // 3. 将这个空对象赋值给函数内部的`this`关键字
+        // 4. 开始执行构造函数内部的代码
+        // 执行结果如果是引用类型就返回执行结果  否则返回对象
+        function _new(FC, ...args) {
+            if (typeof FC !== "function" || !FC.prototype) throw Error("error")
+            var obj = Object.create(FC.prototype)
+            var result = FC.apply(obj, args)
+            if (/object|function/i.test(typeof result)) return result || obj
+            return obj
+        }
+        /* 创建对象也可以这么 写
+        var obj = {}
+        obj.__proto__ = FC.prototype */
+        function Fn(name) {
+            this.name = name
+        }
+        Fn.prototype.getName = function () {
+            return this.name
+        }
+        var res = _new(Fn, "future")
+        console.log(res.getName())
+    </script>
+</body>
+
+</html>

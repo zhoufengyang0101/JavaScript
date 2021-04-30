@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        console.log(navigator.userAgent)
+        // `instanceof`运算符用于检测构造函数的prototype属性是否出现在某个实例对象的原型上
+        //  `object instanceof constructor`
+        /*
+        * left 某个实例对象
+        * right 某个构造函数 必须是一个对象
+        */
+        //
+        function _instanceof(left, right) {
+            if (typeof right !== "object" && typeof right !== "function") throw new TypeError("Right-hand side of 'instanceof' is not an object")
+            // 双等号判断 等于null 或者 undefined 的情况
+            if (left == null || (typeof left !== "object" && typeof left !== "function")) return false
+            // 花括号开始的抛异常Uncaught SyntaxError: Unexpected token 'instanceof'
+
+            let proto = left.__proto__
+            // Object.getPrototypeOf(left) 获取原型链  兼容老版本的浏览器
+            // 按照原型链向下查找  直到__proto__ 为空时停止
+            while (1) {
+                if (proto === null) return false
+                if (proto === right.prototype) return true
+                proto = proto.__proto__
+                // Object.getPrototypeOf(proto)
+            }
+        }
+        function fn() { }
+        var obj = {
+            a: 1,
+            b: 2
+        }
+        console.log(_instanceof({}, Object)); // ==> true ---应该报错
+        console.log(_instanceof([1, 2], Object)); // ==> true
+        console.log(_instanceof([1, 2], Array));  // ==> true
+        console.log(_instanceof(null, Object));  // ==> false
+        console.log(_instanceof(undefined, Object)); // ==> false
+        console.log(_instanceof(fn, Object));  // ==> true
+        console.log(_instanceof(fn, Function));  // ==> true
+        console.log(_instanceof(2, Number)); // ==> false
+        console.log(_instanceof("2", String)); // ==> false
+        console.log(_instanceof(obj, Object)); // ==> true
+        console.log(_instanceof(Object, Object)); // ==> true
+        console.log(_instanceof(Function, Object)); // ==> true
+        console.log(_instanceof(Number, Object)); // ==> true
+        console.log(_instanceof(String, Object)); // ==> true
+        console.log(_instanceof(Object, Function)); // ==> true
+        console.log(_instanceof(Object, String)); // ==> false
+
+
+
+        /*
+        // 兼容性判断处理 环境支持es6  ==> typeof Symbol 暂时性死区
+        if (typeof Symbol === "function") {
+        // 返回true/false
+        var insFn = FC[Symbol.hasInstance];
+        if (typeof insFn === "function") { // 可以被调用执行
+                return insFn.call(FC, obj)
+            }
+        }
+        */
+    </script>
+</body>
+
+</html>

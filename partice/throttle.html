@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            height: 9000px;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        // const throttle = (func, wait = 100) => {
+        //     let timer = 0;
+        //     return function () {
+        //         let context = this;
+        //         let args = arguments;
+        //         if (!timer) {
+        //             timer = setTimeout(() => {
+        //                 func.apply(context, args)
+        //                 timer = 0;
+        //                 clearTimeout(timer)
+        //             }, wait)
+        //         }
+        //     }
+        // }
+        function handle() {
+            console.log(Math.random());
+        }
+        window.addEventListener('mousemove', throttle(handle, 2000, {leading: false}));
+
+        /*
+        * func 执行节流的函数
+        * wait 间隔时间
+        * options 对象参数 包含属性：
+        *   leading: false 取消执行第一次
+        *   trailing: false  取消执行最后一次
+        */
+        function throttle(func, wait, options) {
+            var timeout, context, args, result;
+            // 记录执行时间
+            var previous = 0;
+            if (!options) options = {};
+
+            // 延时执行函数
+            var later = function () {
+                previous = options.leading === false ? 0 : new Date().getTime();
+                timeout = null;
+                result = func.apply(context, args);
+                if (!timeout) context = args = null;
+            }
+            
+            var throttled = function () {
+                var now = new Date().getTime();
+                // 判断上次是否执行和第一次是否执行
+                if (!previous && options.leading === false) previous = now;
+                // 记录是否达到间隔时间
+                var remaining = wait - (now - previous);
+                context = this;
+                args = arguments;
+                if (remaining <= 0 || remaining > wait) {
+                    if (timeout) {
+                        clearTimeout(timeout);
+                        timeout = null;
+                    }
+                    previous = now;
+                    result = func.apply(context, args);
+                    if (!timeout) context = args = null;
+                } else if (!timeout && options.trailing !== false) {
+                    // 开启定时器
+                    timeout = setTimeout(later, remaining);
+                }
+                return result;
+            }
+
+            throttled.cancle = function () {
+                clearTimeout(timeout);
+                previous = 0;
+                timeout = null;
+            }
+
+            return throttled;
+
+        }
+
+    </script>
+</body>
+
+</html>

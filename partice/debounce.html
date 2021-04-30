@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #layout {
+            width: 500px;
+            height: 500px;
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="layout">
+
+    </div>
+    <script>
+        // 在频繁的事件回调中做复杂计算，很有可能造成页面卡顿
+        // 此时可以将多次计算合并为一次计算，只在一个精确点做操作
+        // 防抖和节流都是防止函数多次调用 区别在于：
+        // 防抖会在每次触发后重新计时，直到到达指定时间间隔
+        // 节流是相隔指定时间再执行
+
+        // 简单版防抖 
+        /*
+        * func  传入的需要防抖的函数
+        * wait 等待时间
+        * immediate  是否立即执行
+        */
+        const debounce_one = (func, wait = 50) => {
+            // 缓存一个定时器id
+            let timer = 0;
+            // 这里返回的函数是每次用户实际调用的防抖函数
+            // 如果已经设定过定时器了就清空上一次的定时器
+            // 开始一个新的定时器，延迟执行用户传入的方法
+            return function (...args) {
+                if (timer) clearTimeout(timer)
+                timer = setTimeout(() => {
+                    func.apply(this, args)
+                }, wait)
+            }
+        }
+        // 另外一种写法，函数内部支持this和event对象
+        // 其实防抖很简单，写完下面这个案例就已经非常清晰了
+        // 生活中最常见的就是电梯，关门机制：当有人进入电梯就重新计时等待指定的间隔时间
+        // 只要有事件进来就重新计时，如果一直触发这个事件并且间隔小于指定时间间隔，就一直不能执行
+        // 只有这次事件进来后重新计时并且在指定间隔时间内没有事件再进来才会执行
+        function debounce_two(func, wait) {
+            var timeout;
+            return function () {
+                var context = this
+                var args = arguments
+                clearTimeout(timeout)
+                timeout = setTimeout(function () {
+                    func.apply(context, args)
+                }, wait)
+            }
+        }
+        // use
+        var count = 1
+        var node = document.getElementById('layout')
+        function getUserAction(e) {
+            console.log('======', this, e)  // 分别打印：node 节点 和 MouseEvent
+            node.innerHTML = count++
+        }
+        // node.onmousemove = debounce_two(getUserAction, 2000)
+
+        // 最终版：除了支持this和event还支持：立即执行，函数可能有返回值，支持取消功能
+        // immediate 是否立即执行，执行完再进行时间间隔
+        function debounce(func, wait, immediate) {
+            var timeout, result;
+            var debounced = function () {
+                var context = this;
+                var args = arguments;
+                if (timeout) clearTimeout(timeout);
+                if (immediate) {
+                    // 如果执行过，不再执行
+                    var callNow = !timeout;
+                    timeout = setTimeout(function () {
+                        timeout = null;
+                    }, wait)
+                    if (callNow) result = func.apply(context, args)
+                } else {
+                    timeout = setTimeout(function () {
+                        func.apply(context, args);
+                    }, wait)
+                }
+                return result;
+            };
+            debounced.cancel = function () {
+                clearTimeout(timeout);
+                timeout = null;
+            };
+            return debounced;
+        }
+        node.onmousemove = debounce(getUserAction, 2000, true)
+        // // use
+        // var setUserAction = debounce(getUserAction, 3000, false);
+        // // use debounce
+        // window.onresize = setUserAction
+        // console.log(count)
+        // // cancel debounce
+        // setUserAction.cancel();
+    </script>
+</body>
+
+</html>

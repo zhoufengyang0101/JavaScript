@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        // 方法接受两个参数，第一个参数是回调函数，第二个参数是遍历初始值（如果没有从第一项开始）
+        // 函数接受四个参数1.上次执行返回的值 2.当前值 3.索引值 4.当前数组
+        // 函数每次会有一个返回值  作为下一次遍历的初始值
+        Array.prototype._reduce = function (func, initvalue) {
+            // this指向调用此方法的数组
+            if(this.length === 0 && !initvalue) throw Error("参数有误")
+            var index = 1;
+            var value = this[0] // 没有设置初始值时 默认为数组第一项
+            if(initvalue) {
+                index = 0
+                var value = initvalue
+            }
+            for (let i = index; i < this.length; i++) {
+                value = func(value, this[i], i, this)
+            }
+            return value
+        }
+        let arr = [1,2,3,4,5]
+        let reduce = arr._reduce(function (value, item, index, arr) {
+            return value + item
+        }, 100) // 初值100 ==> 115 未设置初值 ==> 15
+        console.log('reduce', reduce)
+
+        // filter
+        // 过滤  返回符合要求的结果  一个新的数组
+        // 接收两个参数  第一个为回调函数  第二个参数可以绑定函数内部的this
+        // 处理函数中接收三个参数 当前元素  元素下标  数组本身
+        Array.prototype._filter = function (func, context) {
+            let array = []
+            for(let i = 0; i<this.length; i++) {
+                if(context ? func.call(context, this[i], i, this) : func(this[i], i, this)) {
+                    array.push(this[i])
+                }
+            }
+            return array
+        }
+        var obj = {
+            a: 1
+        }
+        let filter =  arr._filter(function (item) {
+            console.log("_filter回调函数内部支持this", this.a)
+            return item > 3
+        }, obj)
+        console.log('filter', filter)
+
+        // map   遍历并且处理数组  返回一个新数组  原数组不会改变
+        // 第一个参数是回调函数  第二个参数可以绑定函数中的this
+        // 回调函数接收三个参数 当前元素  索引  整个数组
+        Array.prototype._map = function (func, context) {
+            let arr = []
+            if(context) {
+                var context = context
+                context.fn = func
+            }
+            for(let i = 0; i < this.length; i++) {
+                arr.push(context ? context.fn(this[i], i, this) : func(this[i], i, this))
+            }
+            if(context) delete context.fn
+            return arr
+        }
+        let map = arr._map(function (item, index) {
+            console.log("_map回调函数内部支持this", this.a)
+            return item * index
+        }, obj)
+        console.log('map', map)
+
+        // flatMap 扁平化数组   将数组中嵌套的数组压缩成一个新的数组 并且处理元素
+        // 它只能处理一层嵌套的数组   可以通过每次将回调函数的结果连接起来
+        // 回调函数   this指向
+        // 当前元素  索引  数组
+        Array.prototype._flatMap = function (func, context) {
+            let arr = []
+            if(context) {
+                var context = context
+                context.fn = func
+            }
+            for(let i = 0; i < this.length; i++) {
+                arr = arr.concat(context ? context.fn(this[i], i, this) : func(this[i], i, this))
+            }
+            if(context) delete context.fn
+            return arr
+        }
+        let array = [1,2,3,[4,5,[6,7]],8]
+        let flatMap = array._flatMap(function (item, index, arr) {
+            console.log("_flatMap回调函数内部支持this", this.a)
+            return item
+        }, obj)
+        console.log('flatMap', flatMap)
+
+        // flat 扁平化数组  过滤空项  可指定深度
+        // 一个可选参数  处理嵌套数组的深度 默认为1
+        // 返回一个新数组
+        Array.prototype._flat = function (deep=1) {
+            let arr = []
+            for(let i = 0; i < this.length; i++) {
+                // 过滤空项
+                if(this[i] === undefined) continue
+                // 是数组  且深度满足  递归
+                if(Array.isArray(this[i]) && deep > 0) {
+                    arr = arr.concat(this[i]._flat(--deep))
+                } else {
+                    // 不是数组或深度不满足直接push 
+                    arr.push(this[i])
+                }
+            }
+            return arr
+        }
+        let ar = [1,,,2,[3,4,[5,[6]],7,8],9,10]
+        let flat = ar._flat(3)
+        console.log('flat', flat)
+    </script>
+</body>
+
+</html>

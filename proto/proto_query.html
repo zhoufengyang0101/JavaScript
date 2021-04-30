@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script src="../utils/jquery-3.5.1.js"></script>
+    <script type="module">
+        import Utils from "../utils/Utils.js"
+        // 解析
+        var url = "http://www.baidu.com?user=zfy&age=18&sex =boy"
+        String.prototype._parse = function () {
+            let o = this.split('?')[1].split('&').reduce(function (value, item) {
+                let arr = item.split('=')
+                let obj = {}
+                obj[$.trim(arr[0])] = $.trim(arr[1])
+                return Object.assign(value, obj)
+            }, {})
+            return o
+        }
+        console.log('解析', url._parse())
+
+        // 拼接
+        String.prototype._join = function (obj) {
+            if (!obj || !Utils.isObject(obj)) throw Error("param is not a object")
+            let str = ""
+            for (let prop in obj) {
+                str += "&" + prop + "=" + obj[prop]
+            }
+            return (this + "?" + str.slice(1))
+        }
+        let url1 = "http://www.baidu.com"
+        let obj = {
+            user: "zfy",
+            age: 18,
+            sex: "boy"
+        }
+        console.log('拼接', url1._join(obj))
+
+
+        // 多态
+        function fn(...args) {
+            if (args.length > 3) throw new Error('过长了')
+            // [`f${args.length}`](...args)
+            return eval('f' + args.length+ '(' + `...args` + ')')
+        }
+        // 没有参数时返回0
+        function f0(...args) {
+            return 0
+        }
+        // 一个参数时求平方
+        function f1(...args) {
+            return args[0] + '的平方是' +  args[0] * args[0]
+        }
+        // 两个参数时求次幂
+        function f2(...args) {
+            return args[0] + '的' + args[1] + '次幂是' + Math.pow(args[0], args[1])
+        }
+        // 三个参数时返回相乘结果
+        function f3(...args) {
+            return args.join(",") + "相加的和是" + args[0] * args[1] * args[2]
+        }
+        console.log('无参', fn())
+        console.log('1参', fn(3))
+        console.log('2参', fn(2,4))
+        console.log('3参', fn(1,2,3))
+    </script>
+</body>
+
+</html>

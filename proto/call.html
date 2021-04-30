@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        // call的用法
+        // call方法改变函数的this指向，指向第一个参数  之后的是一个参数列表
+        // 如果这个函数处于非严格模式下，
+        // 那么指定this为null和undefined时，this会自动指向全局对象
+        // 值为原始值(数字，字符串，布尔值)的this会指向该原始值的自动包装对象。
+        function person(...arg) {
+            console.log(this.name);
+            console.log(this);
+            console.log(arg);
+        }
+        var future = {
+            name: "彭于晏"
+        }
+        person.call(future, "zfy", 18);
+        // call方法可以调用父类的构造方法
+        function Product(name, price) {
+            this.name = name;
+            this.price = price;
+        }
+        function Food(name, price) {
+            Product.call(this, name, price);
+            this.category = "food";
+        }
+        function Toy(name, price) {
+            Product.call(this, name, price);
+            this.category = "toy";
+        }
+        var pro = new Product("cup", 100);
+        console.log(pro);
+        var chess = new Food("feta", 40);
+        var fun = new Toy("hh", 20);
+        console.log(chess);
+        console.log(fun);
+
+        // 使用call方法调用匿名函数
+        var animals = [
+            { species: "Lion", name: "king" },
+            { species: "Whale", name: "Fail" }
+        ];
+        for (var i = 0; i < animals.length; i++) {
+            (function (i) {
+                this.print = function () {
+                    console.log('#' + i + ' ' + this.species + ':' + this.name);
+                }
+                this.print()
+            }).call(animals[i], i);
+            // 让匿名函数内部的this指向了animals的第i项
+        }
+
+        // 使用call方法调用函数并且指定上下文中的this
+        function greet() {
+            var reply = [this.person, "Is An Awesome", this.role].join(" ");
+            console.log(reply);
+        }
+        var i = {
+            person: 'Douglas Crockford', role: 'Javascript Developer'
+        };
+        greet.call(i); // 让greet函数中的this指向i
+
+        // 实现call
+        // 1. this传值
+        // 2. 参数判断
+        Function.prototype.call2 = function (context) {
+            var context = context || window;
+            context.fn = this;  // 保存调用函数
+            var args = [];  // 存储参数
+            for (var i = 1; i < arguments.length; i++) {
+                args.push('arguments['+i+']')
+            }
+
+            var result = eval('context.fn(' + args + ')')
+
+            delete context.fn
+            return result
+        }
+        function sum(a, b) {
+            console.log(this, a, b)
+        }
+        var obj = {
+            test: 12
+        }
+        sum.call2(obj, 1, 2)
+    </script>
+</body>
+
+</html>

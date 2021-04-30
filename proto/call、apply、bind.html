@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        var obj = {
+            name: "future",
+            date: "2021"
+        }
+        // call实现 
+        // 思路：判断this是否传递，参数是否存在，删除创建的函数
+        // 原理：把当前的函数在指定的上下文环境中（对象）运行
+        // 当传入null  或 undefined 时 自动替换为全局对象
+        Function.prototype._call = function (context) {
+            // 忽略了一些特殊情况 只有null 和 undefined时替换为window
+            // var context = context || window
+            var context = context == null ? window : (typeof context === 'object' ? context : Object(context))
+            // 为防止函数名重复而被删除，使用唯一值
+            context.fn = this
+            // var args = [];
+            // for(var i=1;i<arguments.length;i++) {
+            //     args.push('arguments['+i+']')
+            // }
+            var args = [...arguments].slice(1)
+            // var result = eval('context.fn('+args+')')
+            var result = context.fn(...args)
+            delete context.fn
+            return result
+        }
+        function sum(a, b) {
+            console.log(this.name, a, b)
+        }
+        sum._call(obj, 20, 30)
+
+        // 实现apply  
+        // call/apply的区别只有参数：call是接收多个单个的参数，apply是接收一个数组
+        // 因为第二个参数是数组，所以要处理是否存在
+        Function.prototype._apply = function (context) {
+            var context = context == null ? window : (typeof context === 'object' ? context : Object(context))
+            context.fn = this
+            var result
+            // 判断是否存在第二个参数
+            if (arguments[1]) {
+                result = context.fn(...arguments[1])
+            } else {
+                result = context.fn()
+            }
+            delete context.fn
+            return result
+        }
+        sum._apply(obj, [100, 200, 300, 400])
+
+
+        // 实现bind
+        // 思路：接收保存this指向，接收保存参数，返回一个创建的函数
+        // 原理：同call、apply在指定的上下文环境（对象）中创建一个函数，使用时this时钟指向这里
+        Function.prototype._bind = function (context) {
+            if (typeof this !== "function") {
+                throw new Error("not is function")
+            }
+            var self = this
+            // 保存参数 [...arguments].slice(1)
+            var args = Array.prototype.slice.call(arguments, 1)
+            var newf = function () { };
+            var fBound = function () {
+                // 保存调用时的参数
+                var args2 = Array.prototype.slice.call(arguments)
+                var argSum = args.concat(args2)
+                
+                // if (this instanceof newf) return self.apply(this, argSum)
+                // return self.apply(context, argSum)
+                return self.apply(this instanceof newf ? this : context, argSum)
+                
+            }
+
+            // 因为当返回的函数被当做构造函数时绑定的this会失效，会指向new出的实例化对象
+			// 所以在此处通过修改返回函数的原型来解决，上边声明一个空函数newf进行中转
+            newf.prototype = this.prototype
+            fBound.prototype = new newf()
+            return fBound
+        }
+        function getName() {
+            console.log(this.name, this.date)
+        }
+        var fns = getName._bind(obj)
+        fns()
+    </script>
+</body>
+
+</html>

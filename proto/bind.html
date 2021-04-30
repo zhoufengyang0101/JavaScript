@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        // bind方法创建一个新的函数，当被调用时，将其this关键字设置为提供的值。
+        // 其余参数作为新函数的参数，   不会在创建时执行，在调用时才执行
+        // 返回一个函数的拷贝，并且拥有指定的this值和初始参数
+
+        // 创建绑定函数
+        // bind()最简单的用法是创建一个函数，使这个函数无论怎么调用都有同样的this值
+        var x = 9;
+        var module = {
+            x : 81,
+            getX : function () {
+                return this.x;
+            }
+        }
+        console.log(module.getX());  // ==> 81
+
+        // 这种方式，将getX重新赋值给了变量retrieveX，导致了this指向的丢失
+        var retrieveX = module.getX;
+        console.log(retrieveX()); // ==> 9
+
+        var boundGetX = retrieveX.bind(module);
+        console.log(boundGetX()); // ==> 81
+        // 使用bind重新将this指向绑定到了module
+    </script>
+</body>
+</html>
