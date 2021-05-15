@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        var d = Symbol();
+        var e = Symbol();
+        var ss = { a: 1 };
+        var date = new Date();
+        date.setFullYear(2022);
+        var obj = {
+            a: 1,
+            b: 2,
+            c: [1, 2, 3],
+            zz: new Set([1, 2, ss]),
+            yy: new Map(),
+            [d]: "aaa",
+            z: document.createElement("div"),
+            d: {
+                e: date,
+                f: /a/g,
+                g: function (s) {
+                    console.log(s);
+                },
+                h: {},
+            },
+        };
+        Object.defineProperties(obj.d.h, {
+            i: {
+                value: 10,
+            },
+            j: {
+                configurable: true,
+                writable: true,
+                value: [1, 2, 3, 4],
+            },
+            k: {
+                writable: true,
+                value: {
+                    l: {},
+                    m: "abcde",
+                    n: true,
+                    o: [1, 2, 3],
+                },
+            },
+            [e]: {
+                value: ["a", "b", "c", "e"],
+            },
+        });
+        obj.z.style.width = "50px";
+        obj.z.style.height = "50px";
+        obj.z.style.backgroundColor = "red";
+
+        Object.defineProperties(obj.d.h.k.l, {
+            p: {
+                value: function () {
+                    console.log("p");
+                },
+            },
+            q: {
+                value: {
+                    r: { a: 1 },
+                    j: { b: 2 },
+                },
+            },
+        });
+        var a_1 = { a: 1 };
+        var a_2 = { b: 2 };
+        obj.yy.set("name", "xietian");
+        obj.yy.set(a_1, a_2);
+
+        Object.defineProperty(obj, "www", {
+            set: function (_v) {
+                this.a = _v;
+            },
+            get: function () {
+                return this.a;
+            },
+        });
+
+
+        /*
+        * source 源对象
+        * target 目标对象
+        */
+        function deepCopy(source, target) {
+            if (!target) target = {};
+            var names = Object.getOwnPropertyNames(source).concat(Object.getOwnPropertySymbols(source));
+            for (var i = 0; i < names.length; i++) {
+                var desc = Object.getOwnPropertyDescriptor(source, names[i]);
+                if(typeof desc.value === "object" && desc.value !== null) {
+                    var o;
+                    if(desc.value instanceof HTMLElement) {
+                        o = document.createElement(desc.value.nodeName);
+                        Object.keys(desc.value.style).forEach(key => o.style[key] = desc.value.style[key]);
+                    } else if (desc.value.constructor === Set || desc.value.constructor === Map || desc.value.constructor === Date) {
+                        o = new desc.value.constructor(desc.value);
+                    } else if (desc.value.constructor === RegExp) {
+                        o = new RegExp(desc.value.source, desc.value.flags);
+                    } else {
+                        o = new desc.value.constructor();
+                    }
+                    Object.defineProperty(target, names[i], {
+                        enumerable: desc.enumerable,
+                        configurable: desc.configurable,
+                        writable: desc.writable,
+                        value: o
+                    });
+                    deepCopy(desc.value, o);
+                } else {
+                    Object.defineProperty(target, names[i], desc);
+                }
+            }
+            return target;
+        }
+
+
+        var o = deepCopy(obj)
+        obj.d.h.k.o[1] = 100;
+        console.log(obj, o)
+        console.log(o.z)
+        document.body.appendChild(o.z)
+    </script>
+</body>
+
+</html>
